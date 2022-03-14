@@ -4,7 +4,7 @@
 #include <QTimer>
 #include <QApplication>
 #include <QMessageBox>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QPropertyAnimation>
 
 #include <QHBoxLayout>
@@ -63,8 +63,8 @@ NotificationWidget::NotificationWidget(const NotificationParams& params, QWidget
 
     InitUI(params);
 
-    QDesktopWidget* desktop = QApplication::desktop();
-    QRect geometry = desktop->availableGeometry(parent);
+    QScreen* desktop = QGuiApplication::primaryScreen();
+    QRect geometry = desktop->availableGeometry();
     setFixedWidth(geometry.width() / 5);
     setMaximumHeight(geometry.height() / 3);
 }
