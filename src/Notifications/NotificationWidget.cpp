@@ -16,46 +16,42 @@
 #include <QPainter>
 #include <Qt>
 
-namespace NotificationWidgetDetails
-{
-static std::vector<std::pair<QMessageBox::Icon, Result::ResultType>> notificationIconsConvertor =
-{
-  std::make_pair(QMessageBox::Information, Result::RESULT_SUCCESS),
-  std::make_pair(QMessageBox::Warning, Result::RESULT_WARNING),
-  std::make_pair(QMessageBox::Critical, Result::RESULT_ERROR)
-};
+namespace NotificationWidgetDetails {
+    static std::vector<std::pair<QMessageBox::Icon, Result::ResultType>> notificationIconsConvertor =
+            {
+                    std::make_pair(QMessageBox::Information, Result::RESULT_SUCCESS),
+                    std::make_pair(QMessageBox::Warning, Result::RESULT_WARNING),
+                    std::make_pair(QMessageBox::Critical, Result::RESULT_ERROR)
+            };
 
-QMessageBox::Icon Convert(const Result::ResultType& type)
-{
-    using IconNode = std::pair<QMessageBox::Icon, Result::ResultType>;
-    auto iter = std::find_if(notificationIconsConvertor.begin(), notificationIconsConvertor.end(), [type](const IconNode& node)
-                             {
-                                 return node.second == type;
-                             });
-    Q_ASSERT(iter != notificationIconsConvertor.end());
-    return iter->first;
-}
+    QMessageBox::Icon Convert(const Result::ResultType &type) {
+        using IconNode = std::pair<QMessageBox::Icon, Result::ResultType>;
+        auto iter = std::find_if(notificationIconsConvertor.begin(), notificationIconsConvertor.end(),
+                                 [type](const IconNode &node) {
+                                     return node.second == type;
+                                 });
+        Q_ASSERT(iter != notificationIconsConvertor.end());
+        return iter->first;
+    }
 
-QString ColorToHTML(const QColor& color)
-{
-    QString ret = QString("#%1%2%3%4")
-                  .arg(color.alpha(), 2, 16, QChar('0'))
-                  .arg(color.red(), 2, 16, QChar('0'))
-                  .arg(color.green(), 2, 16, QChar('0'))
-                  .arg(color.blue(), 2, 16, QChar('0'));
-    return ret;
-}
+    QString ColorToHTML(const QColor &color) {
+        QString ret = QString("#%1%2%3%4")
+                .arg(color.alpha(), 2, 16, QChar('0'))
+                .arg(color.red(), 2, 16, QChar('0'))
+                .arg(color.green(), 2, 16, QChar('0'))
+                .arg(color.blue(), 2, 16, QChar('0'));
+        return ret;
+    }
 } //namespace NotificationWidgetDetails
 
-NotificationWidget::NotificationWidget(const NotificationParams& params, QWidget* parent)
-    : QWidget(parent)
-{
+NotificationWidget::NotificationWidget(const NotificationParams &params, QWidget *parent)
+        : QWidget(parent) {
     //operator | declared in the global namespace
     //without this string compilation will be failed
     using ::operator|;
     Qt::WindowFlags flags = (Qt::FramelessWindowHint | // Disable window decoration
                              Qt::Tool // Discard display in a separate window
-                             );
+    );
     setWindowFlags(flags);
 
     setAttribute(Qt::WA_TranslucentBackground); // Indicates that the background will be transparent
@@ -63,58 +59,57 @@ NotificationWidget::NotificationWidget(const NotificationParams& params, QWidget
 
     InitUI(params);
 
-    QScreen* desktop = QGuiApplication::primaryScreen();
+    QScreen *desktop = QGuiApplication::primaryScreen();
     QRect geometry = desktop->availableGeometry();
     setFixedWidth(geometry.width() / 5);
     setMaximumHeight(geometry.height() / 3);
 }
 
-void NotificationWidget::OnCloseButtonClicked()
-{
+void NotificationWidget::OnCloseButtonClicked() {
     emit CloseButtonClicked(this);
 }
 
-void NotificationWidget::OnDetailsButtonClicked()
-{
+void NotificationWidget::OnDetailsButtonClicked() {
     emit DetailsButtonClicked(this);
 }
 
-void NotificationWidget::InitUI(const NotificationParams& params)
-{
-    QHBoxLayout* mainLayout = new QHBoxLayout();
+void NotificationWidget::InitUI(const NotificationParams &params) {
+    QHBoxLayout * mainLayout = new QHBoxLayout();
     mainLayout->setContentsMargins(10, 10, 10, 10);
 
-    QVBoxLayout* messageLayout = new QVBoxLayout();
+    QVBoxLayout * messageLayout = new QVBoxLayout();
     messageLayout->setSpacing(5);
     mainLayout->addItem(messageLayout);
 
-    QHBoxLayout* titleLayout = new QHBoxLayout();
+    QHBoxLayout * titleLayout = new QHBoxLayout();
     titleLayout->setSpacing(10);
     messageLayout->addItem(titleLayout);
 
     QFont currentFont = font();
     QFontMetrics fm(currentFont);
     int fontHeight = fm.height();
-    QLabel* iconLabel = new QLabel();
+    QLabel *iconLabel = new QLabel();
     QMessageBox::Icon icon = NotificationWidgetDetails::Convert(params.message.type);
-    QPixmap image = QMessageBox::standardIcon(icon).scaled(QSize(fontHeight, fontHeight), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QPixmap image = QMessageBox::standardIcon(icon).scaled(QSize(fontHeight, fontHeight), Qt::KeepAspectRatio,
+                                                           Qt::SmoothTransformation);
     iconLabel->setPixmap(image);
     iconLabel->setScaledContents(false);
     titleLayout->addWidget(iconLabel);
 
-    if (params.title.isEmpty() == false)
-    {
-        QString title = params.title;
-        QLabel* labelTitle = new QLabel(title);
+    if (params.message.message.isEmpty() == false) {
+        QString title = params.message.message;
+        QLabel *labelTitle = new QLabel(title);
         labelTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
         labelTitle->setStyleSheet("font-weight: bold;");
         titleLayout->addWidget(labelTitle);
     }
 
-    QString message = params.message.message;
-    QLabel* labelMessage = new QLabel(message);
+    QString message = params.title;
+//    QString message = params.message.message;
+    QLabel *labelMessage = new QLabel(message);
     labelMessage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     labelMessage->setWordWrap(true);
+    labelMessage->setStyleSheet("font-weight: bold;");
     messageLayout->addWidget(labelMessage);
 
     QPalette palette;
@@ -135,7 +130,7 @@ void NotificationWidget::InitUI(const NotificationParams& params)
                                  NotificationWidgetDetails::ColorToHTML(pressedColor) + ";"
                                                                                         "}");
 
-    QVBoxLayout* buttonsLayout = new QVBoxLayout();
+    QVBoxLayout * buttonsLayout = new QVBoxLayout();
     buttonsLayout->setContentsMargins(0, 0, 0, 0);
     buttonsLayout->setSpacing(5);
     {
@@ -146,8 +141,7 @@ void NotificationWidget::InitUI(const NotificationParams& params)
         buttonsLayout->addWidget(closeButton);
         connect(closeButton, &QPushButton::clicked, this, &NotificationWidget::OnCloseButtonClicked);
     }
-    if (params.callback)
-    {
+    if (params.callback) {
         detailsButton = new QPushButton(params.detailsButtonText);
         detailsButton->setObjectName("DetailsButton");
         detailsButton->setStyleSheet(styleSheet);
@@ -159,8 +153,7 @@ void NotificationWidget::InitUI(const NotificationParams& params)
     setLayout(mainLayout);
 }
 
-void NotificationWidget::paintEvent(QPaintEvent* /*event*/)
-{
+void NotificationWidget::paintEvent(QPaintEvent * /*event*/) {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
@@ -185,8 +178,7 @@ void NotificationWidget::paintEvent(QPaintEvent* /*event*/)
     pen.setWidth(1);
     painter.setPen(pen);
     //horizontal line
-    if (detailsButton != nullptr)
-    {
+    if (detailsButton != nullptr) {
         QRect detailsButtonGeometry = detailsButton->geometry();
         int y = (closeButtonGeometry.bottom() + detailsButtonGeometry.top()) / 2;
         QPoint left(qMin(closeButtonGeometry.left(), detailsButtonGeometry.left()), y);

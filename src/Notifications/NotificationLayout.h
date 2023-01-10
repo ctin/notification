@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Notifications/NotificationWidget.h"
+#include "NotificationWidget.h"
 
 #include <QObject>
 #include <QMap>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Result/Result.h"
+#include "../Result/Result.h"
 
 #include <QWidget>
 
