@@ -97,7 +97,7 @@ void NotificationLayout::LayoutWidgets(QWidget* parent)
         }
 
         int x = (layoutType & Qt::AlignLeft) ? 0 : (parent->width() - widget->width());
-        int y = (layoutType & Qt::AlignTop) ? totalHeight : (parent->height() - widget->height() - totalHeight);
+        int y = (layoutType & Qt::AlignBottom) ? totalHeight : (parent->height() - widget->height() - totalHeight);
         QPoint widgetPos(x, y);
 
         //noticationWidget marked as window inside Qt, in this case we need to use global coordinates
